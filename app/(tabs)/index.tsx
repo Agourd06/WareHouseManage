@@ -1,74 +1,136 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { Image, StyleSheet, Pressable } from 'react-native';
+import { Link, useRouter } from 'expo-router';
+import { useProducts } from '@/app/context/ProductContext';
+import type { Product } from '@/app/context/ProductContext';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { FlatList } from 'react-native';
 
 export default function HomeScreen() {
+  const { products, loading, error } = useProducts();
+  const router = useRouter();
+
+  if (loading) {
+    return (
+      <ThemedView style={styles.container}>
+        <ThemedText>Loading...</ThemedText>
+      </ThemedView>
+    );
+  }
+
+  if (error) {
+    return (
+      <ThemedView style={styles.container}>
+        <ThemedText>Error: {error}</ThemedText>
+      </ThemedView>
+    );
+  }
+
+  const getStockColor = (totalStock: number) => {
+    if (totalStock > 10) return '#4CAF50';  
+    if (totalStock > 0) return '#FF9800';   
+    return '#F44336';                       
+  };
+
+  const renderProduct = ({ item }: { item: Product }) => {
+    const totalStock = item.stocks.reduce((acc, stock) => acc + stock.quantity, 0);
+    
+    return (
+      <Pressable 
+        onPress={() => {
+          router.push(`/product/${item.id}`);
+        }}
+        style={styles.productCardWrapper}
+      >
+        <ThemedView style={styles.productCard}>
+          <Image source={{ uri: item.image }} style={styles.productImage} />
+          <ThemedView style={styles.productInfo}>
+            <ThemedText type="subtitle" numberOfLines={1}>{item.name}</ThemedText>
+            <ThemedText>Price: ${item.price}</ThemedText>
+            <ThemedView style={styles.stockIndicator}>
+              <ThemedView 
+                style={[
+                  styles.stockDot, 
+                  { backgroundColor: getStockColor(totalStock) }
+                ]} 
+              />
+              <ThemedText>Stock: {totalStock}</ThemedText>
+            </ThemedView>
+          </ThemedView>
+        </ThemedView>
+      </Pressable>
+    );
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <ThemedView style={styles.container}>
+      <FlatList
+        data={products}
+        renderItem={renderProduct}
+        keyExtractor={(item) => item.id.toString()}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
+        contentContainerStyle={styles.productList}
+        ListHeaderComponent={
+          <ThemedView style={styles.titleContainer}>
+            <ThemedText type="title">Products</ThemedText>
+          </ThemedView>
+        }
+      />
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 60,
+  },
   titleContainer: {
+    padding: 16,
+    marginBottom: 16,
+  },
+  productList: {
+    gap: 16,
+    padding: 16,
+  },
+  productCardWrapper: {
+    flex: 1,
+    maxWidth: '50%',
+  },
+  productCard: {
+    margin: 4,
+    borderRadius: 8,
+    padding: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  productImage: {
+    width: '100%',
+    height: 120,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  productInfo: {
+    gap: 4,
+  },
+  stockIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  stockDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  row: {
+    justifyContent: 'space-between',
   },
 });
