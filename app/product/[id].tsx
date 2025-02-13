@@ -1,3 +1,4 @@
+import React from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StyleSheet, Image, ScrollView, Alert, TextInput, Button, TouchableOpacity, View } from 'react-native';
 import { useState } from 'react';
@@ -25,6 +26,14 @@ export default function ProductDetails() {
     longitude: ''
   });
   const { user } = useUser();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: product?.name || '',
+    price: product?.price.toString() || '',
+    supplier: product?.supplier || '',
+    image: product?.image || '',
+    barcode: product?.barcode || '',
+  });
 
   if (loading) {
     return <LoadingSpinner message="Loading product details..." />;
@@ -63,7 +72,7 @@ export default function ProductDetails() {
         ]
       };
 
-      await productService.updateProduct(product.id, updatedProduct);
+      await productService.updateProduct(product.id.toString(), updatedProduct);
       await refreshProducts();
       Alert.alert('Success', 'Stock updated successfully');
       setQuantity('');
@@ -97,7 +106,7 @@ export default function ProductDetails() {
         stocks: [...product.stocks, newStock]
       };
 
-      await productService.updateProduct(product.id, updatedProduct);
+      await productService.updateProduct(product.id.toString(), updatedProduct);
       await refreshProducts();
       setShowAddWarehouse(false);
       setNewWarehouse({ name: '', city: '', latitude: '', longitude: '' });
@@ -119,7 +128,7 @@ export default function ProductDetails() {
           style: "destructive",
           onPress: async () => {
             try {
-              await productService.deleteProduct(product.id);
+              await productService.deleteProduct(product.id.toString());
               await refreshProducts();
               Alert.alert('Success', 'Product deleted successfully', [
                 {
@@ -162,7 +171,7 @@ export default function ProductDetails() {
                 ]
               };
 
-              await productService.updateProduct(product.id, updatedProduct);
+              await productService.updateProduct(product.id.toString(), updatedProduct);
               await refreshProducts();
               Alert.alert('Success', 'Warehouse removed successfully');
             } catch (error) {
@@ -182,172 +191,285 @@ export default function ProductDetails() {
     return '#F44336';
   };
 
+  const handleUpdateProduct = async () => {
+    try {
+      if (!editForm.name || !editForm.price) {
+        Alert.alert('Error', 'Name and price are required');
+        return;
+      }
+
+      const updatedProduct = {
+        ...product,
+        name: editForm.name,
+        price: Number(editForm.price),
+        supplier: editForm.supplier,
+        image: editForm.image,
+        barcode: editForm.barcode,
+        editedBy: [
+          ...product.editedBy,
+          {
+            warehousemanId: user?.id || 0,
+            warehousemanName: user?.name || 'Unknown',
+            at: new Date().toISOString()
+          }
+        ]
+      };
+
+      await productService.updateProduct(product.id.toString(), updatedProduct);
+      await refreshProducts();
+      setIsEditing(false);
+      Alert.alert('Success', 'Product updated successfully');
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Failed to update product');
+    }
+  };
+
+  const EditForm = () => (
+    <ThemedView style={styles.editForm}>
+      <ThemedText style={styles.sectionTitle}>Edit Product</ThemedText>
+      
+      <TextInput
+        style={styles.input}
+        value={editForm.name}
+        onChangeText={(text) => setEditForm(prev => ({ ...prev, name: text }))}
+        placeholder="Product Name"
+        blurOnSubmit={false}
+      />
+      
+      <TextInput
+        style={styles.input}
+        value={editForm.price}
+        onChangeText={(text) => setEditForm(prev => ({ ...prev, price: text }))}
+        placeholder="Price"
+        keyboardType="decimal-pad"
+        blurOnSubmit={false}
+      />
+      
+      <TextInput
+        style={styles.input}
+        value={editForm.supplier}
+        onChangeText={(text) => setEditForm(prev => ({ ...prev, supplier: text }))}
+        placeholder="Supplier"
+        blurOnSubmit={false}
+      />
+      
+      <TextInput
+        style={styles.input}
+        value={editForm.image}
+        onChangeText={(text) => setEditForm(prev => ({ ...prev, image: text }))}
+        placeholder="Image URL"
+        blurOnSubmit={false}
+      />
+      
+      <TextInput
+        style={styles.input}
+        value={editForm.barcode}
+        onChangeText={(text) => setEditForm(prev => ({ ...prev, barcode: text }))}
+        placeholder="Barcode"
+        blurOnSubmit={false}
+      />
+
+      <View style={styles.editButtons}>
+        <TouchableOpacity 
+          style={[styles.editButton, styles.cancelButton]}
+          onPress={() => setIsEditing(false)}
+        >
+          <ThemedText style={styles.editButtonText}>Cancel</ThemedText>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={[styles.editButton, styles.saveButton]}
+          onPress={handleUpdateProduct}
+        >
+          <ThemedText style={styles.editButtonText}>Save Changes</ThemedText>
+        </TouchableOpacity>
+      </View>
+    </ThemedView>
+  );
+
   return (
     <ScrollView style={styles.mainContainer}>
       <ThemedView style={styles.container}>
         <View style={styles.header}>
           <Image source={{ uri: product.image }} style={styles.image} />
-          <TouchableOpacity 
-            style={styles.deleteButton}
-            onPress={handleDeleteProduct}
-          >
-            <FontAwesome name="trash" size={20} color="#EF4444" />
-          </TouchableOpacity>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => setIsEditing(true)}
+            >
+              <FontAwesome name="edit" size={20} color="#fff" />
+              <ThemedText style={styles.actionButtonText}>Edit</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.deleteActionButton]}
+              onPress={handleDeleteProduct}
+            >
+              <FontAwesome name="trash" size={20} color="#fff" />
+              <ThemedText style={styles.actionButtonText}>Delete</ThemedText>
+            </TouchableOpacity>
+          </View>
         </View>
         
         <ThemedView style={styles.content}>
-          <ThemedView style={styles.headerName}>
-            <ThemedText style={styles.productName}>{product.name}</ThemedText>
-            <ThemedText style={styles.price}>${product.price}</ThemedText>
-          </ThemedView>
+          {isEditing ? (
+            <EditForm />
+          ) : (
+            <>
+              <ThemedView style={styles.headerName}>
+                <ThemedText style={styles.productName}>{product.name}</ThemedText>
+                <ThemedText style={styles.price}>${product.price}</ThemedText>
+              </ThemedView>
 
-          <ThemedView style={styles.infoCard}>
-            <ThemedView style={styles.infoRow}>
-              <ThemedText style={styles.infoLabel}>Type</ThemedText>
-              <ThemedText style={styles.infoValue}>{product.type}</ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.infoRow}>
-              <ThemedText style={styles.infoLabel}>Supplier</ThemedText>
-              <ThemedText style={styles.infoValue}>{product.supplier}</ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.infoRow}>
-              <ThemedText style={styles.infoLabel}>Barcode</ThemedText>
-              <ThemedText style={styles.infoValue}>{product.barcode}</ThemedText>
-            </ThemedView>
-          </ThemedView>
-          
-          <ThemedView style={[styles.stockIndicator, { backgroundColor: getStockColor(totalStock) }]}>
-            <ThemedText style={styles.stockText}>
-              Total Stock: {totalStock} units
-            </ThemedText>
-          </ThemedView>
+              <ThemedView style={styles.infoCard}>
+                <ThemedView style={styles.infoRow}>
+                  <ThemedText style={styles.infoLabel}>Type</ThemedText>
+                  <ThemedText style={styles.infoValue}>{product.type}</ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.infoRow}>
+                  <ThemedText style={styles.infoLabel}>Supplier</ThemedText>
+                  <ThemedText style={styles.infoValue}>{product.supplier}</ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.infoRow}>
+                  <ThemedText style={styles.infoLabel}>Barcode</ThemedText>
+                  <ThemedText style={styles.infoValue}>{product.barcode}</ThemedText>
+                </ThemedView>
+              </ThemedView>
+              
+              <ThemedView style={[styles.stockIndicator, { backgroundColor: getStockColor(totalStock) }]}>
+                <ThemedText style={styles.stockText}>
+                  Total Stock: {totalStock} units
+                </ThemedText>
+              </ThemedView>
 
-          <ThemedView style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>Update Stock</ThemedText>
-            <ThemedView style={styles.updateForm}>
-              <Picker
-                selectedValue={selectedWarehouse}
-                onValueChange={setSelectedWarehouse}
-                style={styles.picker}>
-                <Picker.Item label="Select Warehouse" value="" />
-                {product.stocks.map((stock) => (
-                  <Picker.Item
-                    key={stock.id}
-                    label={`${stock.name} (Current: ${stock.quantity})`}
-                    value={stock.id.toString()}
+              <ThemedView style={styles.section}>
+                <ThemedText style={styles.sectionTitle}>Update Stock</ThemedText>
+                <ThemedView style={styles.updateForm}>
+                  <Picker
+                    selectedValue={selectedWarehouse}
+                    onValueChange={setSelectedWarehouse}
+                    style={styles.picker}>
+                    <Picker.Item label="Select Warehouse" value="" />
+                    {product.stocks.map((stock) => (
+                      <Picker.Item
+                        key={stock.id}
+                        label={`${stock.name} (Current: ${stock.quantity})`}
+                        value={stock.id.toString()}
+                      />
+                    ))}
+                  </Picker>
+                  
+                  <TextInput
+                    style={styles.input}
+                    value={quantity}
+                    onChangeText={setQuantity}
+                    placeholder="Enter quantity to add/remove"
+                    keyboardType="numeric"
                   />
-                ))}
-              </Picker>
-              
-              <TextInput
-                style={styles.input}
-                value={quantity}
-                onChangeText={setQuantity}
-                placeholder="Enter quantity to add/remove"
-                keyboardType="numeric"
-              />
-              
-              <ThemedView style={styles.quickActions}>
-                <TouchableOpacity 
-                  style={[styles.actionButton, styles.decrementButton]}
-                  onPress={() => setQuantity(prev => (Number(prev) - 1).toString())}
-                >
-                  <ThemedText style={styles.actionButtonText}>-1</ThemedText>
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                  style={[styles.actionButton, styles.incrementButton]}
-                  onPress={() => setQuantity(prev => (Number(prev) + 1).toString())}
-                >
-                  <ThemedText style={styles.actionButtonText}>+1</ThemedText>
-                </TouchableOpacity>
-              </ThemedView>
-              
-              <TouchableOpacity 
-                style={styles.updateButton}
-                onPress={handleUpdateStock}
-              >
-                <FontAwesome name="refresh" size={20} color="#FFFFFF" />
-                <ThemedText style={styles.updateButtonText}>Update Stock</ThemedText>
-              </TouchableOpacity>
-            </ThemedView>
-          </ThemedView>
-
-          <ThemedView style={styles.section}>
-            <ThemedView style={styles.sectionHeader}>
-              <ThemedText type="subtitle">Warehouses & Stock</ThemedText>
-              <TouchableOpacity 
-                style={styles.addButton}
-                onPress={() => setShowAddWarehouse(!showAddWarehouse)}
-              >
-                <FontAwesome name={showAddWarehouse ? "minus" : "plus"} size={20} color="#3B82F6" />
-              </TouchableOpacity>
-            </ThemedView>
-
-            {showAddWarehouse && (
-              <ThemedView style={styles.addWarehouseForm}>
-                <TextInput
-                  style={styles.input}
-                  value={newWarehouse.name}
-                  onChangeText={(text) => setNewWarehouse(prev => ({ ...prev, name: text }))}
-                  placeholder="Warehouse Name"
-                />
-                <TextInput
-                  style={styles.input}
-                  value={newWarehouse.city}
-                  onChangeText={(text) => setNewWarehouse(prev => ({ ...prev, city: text }))}
-                  placeholder="City"
-                />
-                <TextInput
-                  style={styles.input}
-                  value={newWarehouse.latitude}
-                  onChangeText={(text) => setNewWarehouse(prev => ({ ...prev, latitude: text }))}
-                  placeholder="Latitude (optional)"
-                  keyboardType="numeric"
-                />
-                <TextInput
-                  style={styles.input}
-                  value={newWarehouse.longitude}
-                  onChangeText={(text) => setNewWarehouse(prev => ({ ...prev, longitude: text }))}
-                  placeholder="Longitude (optional)"
-                  keyboardType="numeric"
-                />
-                <TouchableOpacity 
-                  style={styles.submitButton}
-                  onPress={handleAddWarehouse}
-                >
-                  <ThemedText style={styles.submitButtonText}>Add Warehouse</ThemedText>
-                </TouchableOpacity>
-              </ThemedView>
-            )}
-
-            <ThemedText type="subtitle" style={styles.sectionTitle}>Stock Locations:</ThemedText>
-            {product.stocks.map(stock => (
-              <ThemedView key={stock.id} style={styles.locationCard}>
-                <View style={styles.locationHeader}>
-                  <View>
-                    <ThemedText style={styles.locationName}>{stock.name}</ThemedText>
-                    <ThemedText>Quantity: {stock.quantity}</ThemedText>
-                    <ThemedText>City: {stock.localisation.city}</ThemedText>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() => handleDeleteWarehouse(stock.id)}
-                    style={styles.deleteIcon}
+                  
+                  <ThemedView style={styles.quickActions}>
+                    <TouchableOpacity 
+                      style={[styles.actionButton, styles.decrementButton]}
+                      onPress={() => setQuantity(prev => (Number(prev) - 1).toString())}
+                    >
+                      <ThemedText style={styles.actionButtonText}>-1</ThemedText>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity 
+                      style={[styles.actionButton, styles.incrementButton]}
+                      onPress={() => setQuantity(prev => (Number(prev) + 1).toString())}
+                    >
+                      <ThemedText style={styles.actionButtonText}>+1</ThemedText>
+                    </TouchableOpacity>
+                  </ThemedView>
+                  
+                  <TouchableOpacity 
+                    style={styles.updateButton}
+                    onPress={handleUpdateStock}
                   >
-                    <FontAwesome name="trash-o" size={18} color="#EF4444" />
+                    <FontAwesome name="refresh" size={20} color="#FFFFFF" />
+                    <ThemedText style={styles.updateButtonText}>Update Stock</ThemedText>
                   </TouchableOpacity>
-                </View>
+                </ThemedView>
               </ThemedView>
-            ))}
 
-            <ThemedText type="subtitle" style={styles.sectionTitle}>Edit History:</ThemedText>
-            {product.editedBy.map((edit, index) => (
-              <ThemedView key={index} style={styles.historyCard}>
-                <ThemedText>Modified by: {edit.warehousemanName || `Warehouseman ${edit.warehousemanId}`}</ThemedText>
-                <ThemedText>At: {new Date(edit.at).toLocaleString()}</ThemedText>
+              <ThemedView style={styles.section}>
+                <ThemedView style={styles.sectionHeader}>
+                  <ThemedText type="subtitle">Warehouses & Stock</ThemedText>
+                  <TouchableOpacity 
+                    style={styles.addButton}
+                    onPress={() => setShowAddWarehouse(!showAddWarehouse)}
+                  >
+                    <FontAwesome name={showAddWarehouse ? "minus" : "plus"} size={20} color="#3B82F6" />
+                  </TouchableOpacity>
+                </ThemedView>
+
+                {showAddWarehouse && (
+                  <ThemedView style={styles.addWarehouseForm}>
+                    <TextInput
+                      style={styles.input}
+                      value={newWarehouse.name}
+                      onChangeText={(text) => setNewWarehouse(prev => ({ ...prev, name: text }))}
+                      placeholder="Warehouse Name"
+                    />
+                    <TextInput
+                      style={styles.input}
+                      value={newWarehouse.city}
+                      onChangeText={(text) => setNewWarehouse(prev => ({ ...prev, city: text }))}
+                      placeholder="City"
+                    />
+                    <TextInput
+                      style={styles.input}
+                      value={newWarehouse.latitude}
+                      onChangeText={(text) => setNewWarehouse(prev => ({ ...prev, latitude: text }))}
+                      placeholder="Latitude (optional)"
+                      keyboardType="numeric"
+                    />
+                    <TextInput
+                      style={styles.input}
+                      value={newWarehouse.longitude}
+                      onChangeText={(text) => setNewWarehouse(prev => ({ ...prev, longitude: text }))}
+                      placeholder="Longitude (optional)"
+                      keyboardType="numeric"
+                    />
+                    <TouchableOpacity 
+                      style={styles.submitButton}
+                      onPress={handleAddWarehouse}
+                    >
+                      <ThemedText style={styles.submitButtonText}>Add Warehouse</ThemedText>
+                    </TouchableOpacity>
+                  </ThemedView>
+                )}
+
+                <ThemedText type="subtitle" style={styles.sectionTitle}>Stock Locations:</ThemedText>
+                {product.stocks.map(stock => (
+                  <ThemedView key={stock.id} style={styles.locationCard}>
+                    <View style={styles.locationHeader}>
+                      <View>
+                        <ThemedText style={styles.locationName}>{stock.name}</ThemedText>
+                        <ThemedText>Quantity: {stock.quantity}</ThemedText>
+                        <ThemedText>City: {stock.localisation.city}</ThemedText>
+                      </View>
+                      <TouchableOpacity
+                        onPress={() => handleDeleteWarehouse(stock.id)}
+                        style={styles.deleteIcon}
+                      >
+                        <FontAwesome name="trash-o" size={18} color="#EF4444" />
+                      </TouchableOpacity>
+                    </View>
+                  </ThemedView>
+                ))}
+
+                <ThemedText type="subtitle" style={styles.sectionTitle}>Edit History:</ThemedText>
+                {product.editedBy.map((edit, index) => (
+                  <ThemedView key={index} style={styles.historyCard}>
+                    <ThemedText>Modified by: {edit.warehousemanName || `Warehouseman ${edit.warehousemanId}`}</ThemedText>
+                    <ThemedText>At: {new Date(edit.at).toLocaleString()}</ThemedText>
+                  </ThemedView>
+                ))}
               </ThemedView>
-            ))}
-          </ThemedView>
+            </>
+          )}
         </ThemedView>
       </ThemedView>
     </ScrollView>
@@ -466,22 +588,27 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   actionButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-    minWidth: 100,
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  deleteActionButton: {
+    backgroundColor: '#EF4444',
   },
   decrementButton: {
     backgroundColor: '#EF4444',
   },
   incrementButton: {
     backgroundColor: '#10B981',
-  },
-  actionButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
   },
   updateButton: {
     backgroundColor: '#3B82F6',
@@ -560,5 +687,50 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
+  },
+  headerButtons: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    flexDirection: 'row',
+    gap: 8,
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  editForm: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    gap: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  editButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 16,
+  },
+  editButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#EF4444',
+  },
+  saveButton: {
+    backgroundColor: '#3B82F6',
+  },
+  editButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 }); 

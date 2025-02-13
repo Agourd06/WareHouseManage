@@ -11,25 +11,32 @@ export const productService = {
     }));
   },
 
-  getProductById: async (id: number): Promise<Product> => {
+  getProductById: async (id: string): Promise<Product> => {
     const response = await api.get(`/products/${id}`);
-    return {
-      ...response.data,
-      id: Number(response.data.id)
-    };
+    return response.data;
   },
 
   createProduct: async (product: Omit<Product, 'id'>): Promise<Product> => {
-    const response = await api.post('/products', product);
+    const timestamp = Date.now() % 1000; // Get last 3 digits
+    const newId = timestamp.toString();
+    const productWithId = {
+      ...product,
+      id: newId
+    };
+    
+    const response = await api.post('/products', productWithId);
     return response.data;
   },
 
-  updateProduct: async (id: number, product: Product): Promise<Product> => {
-    const response = await api.put(`/products/${id}`, product);
+  updateProduct: async (id: string, product: Product): Promise<Product> => {
+    const response = await api.put(`/products/${id}`, {
+      ...product,
+      id: id
+    });
     return response.data;
   },
 
-  deleteProduct: async (id: number): Promise<void> => {
+  deleteProduct: async (id: string): Promise<void> => {
     await api.delete(`/products/${id}`);
   },
 

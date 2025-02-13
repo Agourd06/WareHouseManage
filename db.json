@@ -73,6 +73,16 @@
           "warehousemanId": "1333",
           "warehousemanName": "Amine Boutaleb",
           "at": "2025-02-12T13:05:51.342Z"
+        },
+        {
+          "warehousemanId": "1333",
+          "warehousemanName": "oualid agourd",
+          "at": "2025-02-13T11:11:22.384Z"
+        },
+        {
+          "warehousemanId": "1333",
+          "warehousemanName": "oualid agourd",
+          "at": "2025-02-13T11:11:27.153Z"
         }
       ]
     },
@@ -81,7 +91,7 @@
       "name": "Clavier Mécanique Logitech",
       "type": "Accessoires",
       "barcode": "9876543210987",
-      "price": 100,
+      "price": 500,
       "supplier": "Logitech",
       "image": "https://in-media.apjonlinecdn.com/catalog/product/cache/b3b166914d87ce343d4dc5ec5117b502/8/a/8aa01aa.png",
       "stocks": [
@@ -110,6 +120,21 @@
         {
           "warehousemanId": 1444,
           "at": "2025-02-02"
+        },
+        {
+          "warehousemanId": "1333",
+          "warehousemanName": "Amine Boutaleb",
+          "at": "2025-02-13T10:41:45.647Z"
+        },
+        {
+          "warehousemanId": "1333",
+          "warehousemanName": "Amine Boutaleb",
+          "at": "2025-02-13T10:41:57.645Z"
+        },
+        {
+          "warehousemanId": "1333",
+          "warehousemanName": "Amine Boutaleb",
+          "at": "2025-02-13T10:53:41.848Z"
         }
       ]
     },
@@ -160,7 +185,7 @@
       ]
     },
     {
-      "id": "baf5",
+      "id": "5",
       "name": "Ordinateur Portable Asus Rog Strix G15",
       "price": 500,
       "image": "https://www.asus-store.ma/cdn/shop/files/ordinateur-portable-asus-rog-strix-g15-90nr0582-m002k0-3_1080x.jpg?v=1694532306",
@@ -182,12 +207,11 @@
       ],
       "editedBy": []
     }
-  
   ],
   "warehousemans": [
     {
       "id": "1333",
-      "name": "Amine Boutaleb",
+      "name": "oualid agourd",
       "dob": "1988-05-02",
       "city": "Oujda",
       "secretKey": "AH90907J",

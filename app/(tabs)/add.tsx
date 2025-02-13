@@ -33,7 +33,7 @@ export default function AddProductScreen() {
         type: 'product',
         barcode: formData.barcode || '',
         supplier: formData.supplier || '',
-        stocks: [], // Empty stocks array
+        stocks: [], 
         editedBy: []
       };
 
