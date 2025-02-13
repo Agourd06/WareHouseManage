@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Image, StyleSheet, Pressable, View, Text, TextInput, TouchableOpacity, RefreshControl, ScrollView } from 'react-native';
+import { Image, StyleSheet, Pressable, View, Text, TextInput, TouchableOpacity, RefreshControl } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { useProducts } from '@/app/context/ProductContext';
 import type { Product } from '@/app/context/ProductContext';
@@ -12,8 +12,6 @@ import { FontAwesome } from '@expo/vector-icons';
 import Scanner from '@/components/Scanner';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-type SortOption = 'name' | 'price-asc' | 'price-desc' | 'stock-asc' | 'stock-desc';
-
 export default function HomeScreen() {
   const { products, loading, error, refreshProducts } = useProducts();
   const router = useRouter();
@@ -21,39 +19,11 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showScanner, setShowScanner] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption>('name');
 
-  const getSortedProducts = (products: Product[]) => {
-    const filtered = products.filter(product => 
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.barcode.includes(searchQuery)
-    );
-
-    return filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'price-asc':
-          return a.price - b.price;
-        case 'price-desc':
-          return b.price - a.price;
-        case 'stock-asc':
-          return (
-            a.stocks.reduce((acc, stock) => acc + stock.quantity, 0) -
-            b.stocks.reduce((acc, stock) => acc + stock.quantity, 0)
-          );
-        case 'stock-desc':
-          return (
-            b.stocks.reduce((acc, stock) => acc + stock.quantity, 0) -
-            a.stocks.reduce((acc, stock) => acc + stock.quantity, 0)
-          );
-        default:
-          return 0;
-      }
-    });
-  };
-
-  const sortedProducts = getSortedProducts(products);
+  const filteredProducts = products.filter(product => 
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.barcode.includes(searchQuery)
+  );
 
   const handleBarcodeScan = (barcode: string) => {
     setSearchQuery(barcode);
@@ -115,7 +85,7 @@ export default function HomeScreen() {
   return (
     <ThemedView style={styles.container}>
       <FlatList
-        data={sortedProducts}
+        data={filteredProducts}
         renderItem={renderProduct}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
@@ -169,55 +139,9 @@ export default function HomeScreen() {
 
                 <View style={styles.statsContainer}>
                   <View style={styles.statCard}>
-                    <Text style={styles.statValue}>{sortedProducts.length}</Text>
+                    <Text style={styles.statValue}>{filteredProducts.length}</Text>
                     <Text style={styles.statLabel}>Products</Text>
                   </View>
-                </View>
-
-                <View style={styles.sortContainer}>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <TouchableOpacity
-                      style={[styles.sortButton, sortBy === 'name' && styles.sortButtonActive]}
-                      onPress={() => setSortBy('name')}
-                    >
-                      <FontAwesome 
-                        name="sort-alpha-asc" 
-                        size={16} 
-                        color={sortBy === 'name' ? '#FFFFFF' : '#94A3B8'} 
-                      />
-                      <Text style={[styles.sortButtonText, sortBy === 'name' && styles.sortButtonTextActive]}>
-                        Name
-                      </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={[styles.sortButton, sortBy === 'price-asc' && styles.sortButtonActive]}
-                      onPress={() => setSortBy(sortBy === 'price-asc' ? 'price-desc' : 'price-asc')}
-                    >
-                      <FontAwesome 
-                        name={sortBy === 'price-desc' ? 'sort-amount-desc' : 'sort-amount-asc'} 
-                        size={16} 
-                        color={sortBy.startsWith('price') ? '#FFFFFF' : '#94A3B8'} 
-                      />
-                      <Text style={[styles.sortButtonText, sortBy.startsWith('price') && styles.sortButtonTextActive]}>
-                        Price
-                      </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={[styles.sortButton, sortBy === 'stock-asc' && styles.sortButtonActive]}
-                      onPress={() => setSortBy(sortBy === 'stock-asc' ? 'stock-desc' : 'stock-asc')}
-                    >
-                      <FontAwesome 
-                        name={sortBy === 'stock-desc' ? 'sort-amount-desc' : 'sort-amount-asc'} 
-                        size={16} 
-                        color={sortBy.startsWith('stock') ? '#FFFFFF' : '#94A3B8'} 
-                      />
-                      <Text style={[styles.sortButtonText, sortBy.startsWith('stock') && styles.sortButtonTextActive]}>
-                        Stock
-                      </Text>
-                    </TouchableOpacity>
-                  </ScrollView>
                 </View>
               </View>
             </LinearGradient>
@@ -381,30 +305,5 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  sortContainer: {
-    marginTop: 12,
-    marginBottom: -8,
-  },
-  sortButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 8,
-    gap: 8,
-  },
-  sortButtonActive: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  sortButtonText: {
-    color: '#94A3B8',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  sortButtonTextActive: {
-    color: '#FFFFFF',
   },
 });
