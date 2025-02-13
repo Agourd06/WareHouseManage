@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import { productService } from '@/services/productService';
 
 interface Location {
   city: string;
@@ -16,6 +16,7 @@ interface Stock {
 
 interface EditHistory {
   warehousemanId: number;
+  warehousemanName: string;
   at: string;
 }
 
@@ -49,12 +50,8 @@ export default function ProductProvider({ children }: { children: React.ReactNod
   const refreshProducts = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://192.168.8.107:3000/products');
-      const transformedProducts = response.data.map((product: any) => ({
-        ...product,
-        id: Number(product.id)
-      }));
-      setProducts(transformedProducts);
+      const data = await productService.getAllProducts();
+      setProducts(data);
     } catch (err) {
       setError('Failed to load products');
       console.error('Error fetching products:', err);
@@ -64,23 +61,7 @@ export default function ProductProvider({ children }: { children: React.ReactNod
   };
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get('http://192.168.8.107:3000/products');
-        const transformedProducts = response.data.map((product: any) => ({
-          ...product,
-          id: Number(product.id)
-        }));
-        setProducts(transformedProducts);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to load products' + err);
-        setLoading(false);
-        console.error('Error fetching products:', err);
-      }
-    };
-
-    fetchProducts();
+    refreshProducts();
   }, []);
 
   return (

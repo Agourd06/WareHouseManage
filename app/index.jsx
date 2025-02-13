@@ -14,164 +14,136 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
+import { warehousemanService } from '@/services/warehousemanService';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useUser } from '@/app/context/UserContext';
 
 const LoginScreen = () => {
   const [secretKey, setSecretKey] = useState('');
   const router = useRouter();
+  const { setUser } = useUser();
 
   const handleLogin = async () => {
     try {
-      const response = await axios.get('http://192.168.8.107:3000/warehousemans');
-      const warehousemans = response.data;
-      const user = warehousemans.find(w => w.secretKey === secretKey);
-
+      const user = await warehousemanService.validateSecretKey(secretKey);
+      
       if (user) {
+        setUser(user);
         Alert.alert('Succès', `Bienvenue ${user.name} !`);
         router.replace('/(tabs)');
       } else {
         Alert.alert('Erreur', 'Code secret incorrect');
       }
     } catch (error) {
-      console.log(error);
-      Alert.alert('Erreur', 'Impossible de se connecter au serveur: ' + error.message);
+      console.error(error);
+      Alert.alert('Erreur', 'Impossible de se connecter au serveur');
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      <KeyboardAvoidingView 
-        // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
+    <View style={styles.container}>
+      <LinearGradient
+        colors={['#1E40AF', '#3B82F6']}
+        style={styles.gradient}
       >
         <View style={styles.content}>
-          <Image
-            source={require('../assets/images/icon.png')} 
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          
-          <View style={styles.headerContainer}>
-            <Text style={styles.title}>Gestion de Stock</Text>
-            <Text style={styles.subtitle}>
-              Simplifiez votre gestion d'inventaire
-            </Text>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require('../assets/images/logo.png')}
+              style={styles.logo}
+            />
+            <Text style={styles.title}>Warehouse Manager</Text>
+            <Text style={styles.subtitle}>Manage your inventory efficiently</Text>
           </View>
 
           <View style={styles.formContainer}>
-            <Text style={styles.label}>Code d'accès magasinier</Text>
             <TextInput
+              style={styles.input}
+              placeholder="Enter your secret key"
+              placeholderTextColor="#94A3B8"
               value={secretKey}
               onChangeText={setSecretKey}
-              placeholder="Entrez votre code secret"
               secureTextEntry
-              style={styles.input}
-              autoCapitalize="none"
-              autoCorrect={false}
             />
-            
             <TouchableOpacity 
               style={styles.loginButton}
               onPress={handleLogin}
             >
-              <Text style={styles.loginButtonText}>Se Connecter</Text>
+              <Text style={styles.loginButtonText}>Login</Text>
             </TouchableOpacity>
           </View>
-
-          {/* Footer */}
-          <Text style={styles.footer}>
-            Application de Gestion de Stock v1.0
-          </Text>
         </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F6FA',
   },
-  keyboardView: {
+  gradient: {
     flex: 1,
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: 32,
     justifyContent: 'center',
+  },
+  logoContainer: {
     alignItems: 'center',
+    marginBottom: 48,
+    transform: [{ scale: 1.1 }],
   },
   logo: {
     width: 120,
     height: 120,
-    marginBottom: 20,
-  },
-  headerContainer: {
-    alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 24,
   },
   title: {
-    fontSize: 28,
+    fontSize: 36,
     fontWeight: 'bold',
-    color: '#1a237e',
-    marginBottom: 8,
+    color: '#FFFFFF',
+    marginBottom: 12,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 18,
+    color: '#E2E8F0',
     textAlign: 'center',
   },
   formContainer: {
-    width: '100%',
-    maxWidth: 320,
-  },
-  label: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 8,
-    fontWeight: '500',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 24,
+    padding: 32,
+    backdropFilter: 'blur(10px)',
   },
   input: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 15,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    fontSize: 18,
     marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    fontSize: 16,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowRadius: 8,
+    elevation: 5,
   },
   loginButton: {
-    backgroundColor: '#1a237e',
-    borderRadius: 8,
-    padding: 15,
+    backgroundColor: '#10B981',
+    borderRadius: 16,
+    padding: 20,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
     elevation: 5,
   },
   loginButtonText: {
-    color: 'white',
-    fontSize: 16,
+    color: '#FFFFFF',
+    fontSize: 18,
     fontWeight: 'bold',
-  },
-  footer: {
-    marginTop: 40,
-    color: '#666',
-    fontSize: 12,
   },
 });
 

@@ -13,7 +13,7 @@
         {
           "id": 1999,
           "name": "Gueliz B2",
-          "quantity": 6,
+          "quantity": 16,
           "localisation": {
             "city": "Marrakesh",
             "latitude": 31.628674,
@@ -23,7 +23,7 @@
         {
           "id": 2991,
           "name": "Lazari H2",
-          "quantity": 54,
+          "quantity": 44,
           "localisation": {
             "city": "Oujda",
             "latitude": 34.689404,
@@ -63,6 +63,16 @@
         {
           "warehousemanId": 1,
           "at": "2025-02-11T13:50:49.631Z"
+        },
+        {
+          "warehousemanId": "1333",
+          "warehousemanName": "Amine Boutaleb",
+          "at": "2025-02-12T11:01:42.384Z"
+        },
+        {
+          "warehousemanId": "1333",
+          "warehousemanName": "Amine Boutaleb",
+          "at": "2025-02-12T13:05:51.342Z"
         }
       ]
     },
@@ -111,37 +121,68 @@
       "price": 11000,
       "supplier": "HP",
       "image": "https://technoplace.ma/11482-large_default/hp-omen-17-i7-7700hq-173-16gb-2tb-geforce-gtx-10.jpg",
-      "stocks": [],
+      "stocks": [
+        {
+          "id": 1739356594645,
+          "name": "Oued lbacha",
+          "quantity": 40,
+          "localisation": {
+            "city": "Safi",
+            "latitude": 34.6445,
+            "longitude": -2.454545
+          }
+        }
+      ],
       "editedBy": [
         {
           "warehousemanId": 1444,
           "at": "2025-02-02"
+        },
+        {
+          "warehousemanId": 1,
+          "at": "2025-02-12T10:36:44.877Z"
+        },
+        {
+          "warehousemanId": "1333",
+          "warehousemanName": "Amine Boutaleb",
+          "at": "2025-02-12T10:52:24.551Z"
+        },
+        {
+          "warehousemanId": "1333",
+          "warehousemanName": "Amine Boutaleb",
+          "at": "2025-02-12T13:10:29.664Z"
+        },
+        {
+          "warehousemanId": "1333",
+          "warehousemanName": "Amine Boutaleb",
+          "at": "2025-02-12T16:23:50.286Z"
         }
       ]
     },
     {
-      "id": "1739271844970",
-      "name": "Pc",
-      "type": "Chi haja",
-      "barcode": "718717171",
-      "price": 30,
-      "supplier": "Gqgqg",
-      "image": "Hhshs",
-      "warehouseId": "1999",
+      "id": "baf5",
+      "name": "Ordinateur Portable Asus Rog Strix G15",
+      "price": 500,
+      "image": "https://www.asus-store.ma/cdn/shop/files/ordinateur-portable-asus-rog-strix-g15-90nr0582-m002k0-3_1080x.jpg?v=1694532306",
+      "warehouseId": "3",
+      "barcode": "6111128000088",
+      "type": "product",
+      "supplier": "",
       "stocks": [
         {
-          "id": 1999,
-          "name": "Gueliz B2",
+          "id": 3,
+          "name": "Main Warehouse",
           "quantity": 0,
           "localisation": {
-            "city": "Marrakesh",
-            "latitude": 0,
-            "longitude": 0
+            "city": "Paris",
+            "latitude": 48.8566,
+            "longitude": 2.3522
           }
         }
       ],
       "editedBy": []
     }
+  
   ],
   "warehousemans": [
     {
