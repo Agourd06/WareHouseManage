@@ -10,6 +10,7 @@ import { productService } from '@/services/productService';
 import { FontAwesome } from '@expo/vector-icons';
 import { useUser } from '@/app/context/UserContext';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { generateProductPDF } from '@/utils/pdfGenerator';
 
 export default function ProductDetails() {
   const { id } = useLocalSearchParams();
@@ -225,6 +226,14 @@ export default function ProductDetails() {
     }
   };
 
+  const handleDownloadPDF = async () => {
+    try {
+      await generateProductPDF(product as any);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to generate PDF');
+    }
+  };
+
   const EditForm = () => (
     <ThemedView style={styles.editForm}>
       <ThemedText style={styles.sectionTitle}>Edit Product</ThemedText>
@@ -307,6 +316,13 @@ export default function ProductDetails() {
             >
               <FontAwesome name="trash" size={20} color="#fff" />
               <ThemedText style={styles.actionButtonText}>Delete</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.downloadButton]}
+              onPress={handleDownloadPDF}
+            >
+              <FontAwesome name="file-pdf-o" size={20} color="#fff" />
+              <ThemedText style={styles.actionButtonText}>Download PDF</ThemedText>
             </TouchableOpacity>
           </View>
         </View>
@@ -732,5 +748,14 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  downloadButton: {
+    backgroundColor: '#4CAF50',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 8,
   },
 }); 
