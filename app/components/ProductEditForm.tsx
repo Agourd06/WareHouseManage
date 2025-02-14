@@ -20,7 +20,7 @@ interface ProductEditFormProps {
   onUpdate: () => void;
 }
 
-export function ProductEditForm({ 
+export default function ProductEditForm({ 
   editForm, 
   setEditForm, 
   onCancel, 
