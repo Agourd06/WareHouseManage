@@ -11,6 +11,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useUser } from '@/app/context/UserContext';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { generateProductPDF } from '@/utils/pdfGenerator';
+import Toast from 'react-native-toast-message';
 
 export default function ProductDetails() {
   const { id } = useLocalSearchParams();
@@ -75,19 +76,31 @@ export default function ProductDetails() {
 
       await productService.updateProduct(product.id.toString(), updatedProduct);
       await refreshProducts();
-      Alert.alert('Success', 'Stock updated successfully');
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Stock updated successfully'
+      });
       setQuantity('');
       setSelectedWarehouse('');
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'Failed to update stock');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to update stock'
+      });
     }
   };
 
   const handleAddWarehouse = async () => {
     try {
       if (!newWarehouse.name || !newWarehouse.city) {
-        Alert.alert('Error', 'Please fill warehouse name and city');
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Please fill warehouse name and city'
+        });
         return;
       }
 
@@ -111,10 +124,18 @@ export default function ProductDetails() {
       await refreshProducts();
       setShowAddWarehouse(false);
       setNewWarehouse({ name: '', city: '', latitude: '', longitude: '' });
-      Alert.alert('Success', 'Warehouse added successfully');
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Warehouse added successfully'
+      });
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'Failed to add warehouse');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to add warehouse'
+      });
     }
   };
 
@@ -131,15 +152,19 @@ export default function ProductDetails() {
             try {
               await productService.deleteProduct(product.id.toString());
               await refreshProducts();
-              Alert.alert('Success', 'Product deleted successfully', [
-                {
-                  text: 'OK',
-                  onPress: () => router.replace('/(tabs)')
-                }
-              ]);
+              Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: 'Product deleted successfully'
+              });
+              router.replace('/(tabs)');
             } catch (error) {
               console.error(error);
-              Alert.alert('Error', 'Failed to delete product');
+              Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to delete product'
+              });
             }
           }
         }
@@ -174,10 +199,18 @@ export default function ProductDetails() {
 
               await productService.updateProduct(product.id.toString(), updatedProduct);
               await refreshProducts();
-              Alert.alert('Success', 'Warehouse removed successfully');
+              Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: 'Warehouse removed successfully'
+              });
             } catch (error) {
               console.error(error);
-              Alert.alert('Error', 'Failed to remove warehouse');
+              Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to remove warehouse'
+              });
             }
           }
         }
@@ -195,7 +228,11 @@ export default function ProductDetails() {
   const handleUpdateProduct = async () => {
     try {
       if (!editForm.name || !editForm.price) {
-        Alert.alert('Error', 'Name and price are required');
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Name and price are required'
+        });
         return;
       }
 
@@ -219,10 +256,18 @@ export default function ProductDetails() {
       await productService.updateProduct(product.id.toString(), updatedProduct);
       await refreshProducts();
       setIsEditing(false);
-      Alert.alert('Success', 'Product updated successfully');
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Product updated successfully'
+      });
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'Failed to update product');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to update product'
+      });
     }
   };
 
@@ -230,7 +275,11 @@ export default function ProductDetails() {
     try {
       await generateProductPDF(product as any);
     } catch (error) {
-      Alert.alert('Error', 'Failed to generate PDF');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to generate PDF'
+      });
     }
   };
 
@@ -252,6 +301,7 @@ export default function ProductDetails() {
         onChangeText={(text) => setEditForm(prev => ({ ...prev, price: text }))}
         placeholder="Price"
         keyboardType="decimal-pad"
+        
         blurOnSubmit={false}
       />
       

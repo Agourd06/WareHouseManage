@@ -23,7 +23,7 @@
         {
           "id": 2991,
           "name": "Lazari H2",
-          "quantity": 44,
+          "quantity": 49,
           "localisation": {
             "city": "Oujda",
             "latitude": 34.689404,
@@ -83,6 +83,11 @@
           "warehousemanId": "1333",
           "warehousemanName": "oualid agourd",
           "at": "2025-02-13T11:11:27.153Z"
+        },
+        {
+          "warehousemanId": "1333",
+          "warehousemanName": "oualid agourd",
+          "at": "2025-02-15T19:52:59.051Z"
         }
       ]
     },
@@ -98,7 +103,7 @@
         {
           "id": 1999,
           "name": "Gueliz B2",
-          "quantity": 20,
+          "quantity": 22,
           "localisation": {
             "city": "Marrakesh",
             "latitude": 31.628674,
@@ -108,7 +113,7 @@
         {
           "id": 2991,
           "name": "Lazari H2",
-          "quantity": 5,
+          "quantity": 6,
           "localisation": {
             "city": "Oujda",
             "latitude": 34.689404,
@@ -135,6 +140,16 @@
           "warehousemanId": "1333",
           "warehousemanName": "Amine Boutaleb",
           "at": "2025-02-13T10:53:41.848Z"
+        },
+        {
+          "warehousemanId": 0,
+          "warehousemanName": "Unknown",
+          "at": "2025-02-15T19:49:34.659Z"
+        },
+        {
+          "warehousemanId": "1333",
+          "warehousemanName": "oualid agourd",
+          "at": "2025-02-15T20:06:22.064Z"
         }
       ]
     },
@@ -197,7 +212,7 @@
         {
           "id": 3,
           "name": "Main Warehouse",
-          "quantity": 0,
+          "quantity": 10,
           "localisation": {
             "city": "Paris",
             "latitude": 48.8566,
@@ -205,6 +220,23 @@
           }
         }
       ],
+      "editedBy": [
+        {
+          "warehousemanId": "1333",
+          "warehousemanName": "oualid agourd",
+          "at": "2025-02-15T19:58:12.552Z"
+        }
+      ]
+    },
+    {
+      "id": "267",
+      "name": "Ggf",
+      "price": null,
+      "image": "Hgh",
+      "barcode": "5766",
+      "supplier": "Ggg",
+      "type": "product",
+      "stocks": [],
       "editedBy": []
     }
   ],

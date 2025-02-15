@@ -103,7 +103,7 @@ export default function HomeScreen() {
           <Text style={styles.productName} numberOfLines={2}>
             {item.name}
           </Text>
-          <Text style={styles.price}>${item.price.toFixed(2)}</Text>
+          <Text style={styles.price}>${item.price?.toFixed(2)}</Text>
           <View style={[styles.stockBadge, { backgroundColor: getStockColor(totalStock) }]}>
             <Text style={styles.stockText}>{totalStock} units</Text>
           </View>

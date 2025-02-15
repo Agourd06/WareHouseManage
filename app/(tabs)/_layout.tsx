@@ -5,9 +5,25 @@ import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useUser } from '@/app/context/UserContext';
+import { useRouter } from 'expo-router';
+import { useEffect } from 'react';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { setUser, user } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/(auth)/login');
+    }
+  }, [user]);
+
+  const handleLogout = () => {
+    setUser(null);
+    router.push('/(auth)/login');
+  };
 
   return (
     <Tabs
@@ -62,6 +78,19 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <FontAwesome name="compass" size={24} color={color} />,
         }}
       /> */}
+      <Tabs.Screen
+        name="logout"
+        options={{
+          title: 'Logout',
+          tabBarIcon: ({ color }) => <FontAwesome name="sign-out" size={24} color={color} />,
+        }}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            handleLogout();
+          },
+        }}
+      />
     </Tabs>
   );
 }

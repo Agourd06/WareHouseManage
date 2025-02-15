@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, TextInput, ScrollView, Alert, TouchableOpacity } from 'react-native';
+import { StyleSheet, TextInput, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ThemedText as Text } from '@/components/ThemedText';
 import { ThemedView as View } from '@/components/ThemedView';
@@ -7,6 +7,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { productService } from '@/services/productService';
 import Scanner from '@/components/Scanner';
 import { useProducts } from '@/app/context/ProductContext';
+import Toast from 'react-native-toast-message';
 
 export default function AddProductScreen() {
   const router = useRouter();
@@ -23,7 +24,11 @@ export default function AddProductScreen() {
   const handleSubmit = async () => {
     try {
       if (!formData.name || !formData.price) {
-        Alert.alert('Error', 'Please fill all required fields');
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Please fill all required fields'
+        });
         return;
       }
 
@@ -39,15 +44,19 @@ export default function AddProductScreen() {
 
       await productService.createProduct(newProduct);
       await refreshProducts();
-      Alert.alert('Success', 'Product added successfully', [
-        {
-          text: 'OK',
-          onPress: () => router.replace('/(tabs)')
-        }
-      ]);
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Product added successfully'
+      });
+      router.replace('/(tabs)');
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'Failed to add product');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to add product'
+      });
     }
   };
 
@@ -55,6 +64,8 @@ export default function AddProductScreen() {
     setFormData(prev => ({ ...prev, barcode }));
     setShowScanner(false);
   };
+
+  const onPriceChange = (text: string) => setFormData({ ...formData, price: text.replace(/[^0-9]/g, '') })
 
   return (
     <ScrollView style={styles.container}>
@@ -86,7 +97,7 @@ export default function AddProductScreen() {
               placeholder="Enter price"
               keyboardType="decimal-pad"
               value={formData.price}
-              onChangeText={(text) => setFormData({ ...formData, price: text })}
+              onChangeText={onPriceChange}
             />
           </View>
         </View>
